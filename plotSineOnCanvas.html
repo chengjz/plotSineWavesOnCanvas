@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sine Wave</title>
+</head>
+
+<body>
+    <h1>Sine Waves</h1>
+    <canvas id="canvas" width="800" height="500"/>
+</body>
+<script>
+
+/**
+ * Painting Sine Waves with Axis and grid on the canvas with Pure JavaScript
+ *
+ * Inputs:
+ * - plotGrid: Call back function which plot Axis and grid
+ * - plotSine: Call back function which plot Sine Waves
+ * - amplitude: The amplitude of Sine Waves
+ * - frequency: The angular frequency of Sine Waves
+ * - offset: A integer representing the phase of Sine Waves
+ * - numLinesX: A integer representing The numbers of the X-axis
+ * - numLinesY: A integer representing The numbers of the Y-axis
+ * - marginRatio: A float representing the plot's margin to canvas size
+ */
+const draw = function paintingPixelsOnTheCanvas(
+  plotGrid,
+  plotSine,
+  amplitude = 1,
+  frequency = 0.1,
+  offset = 0,
+  numLinesX = 10,
+  numLinesY = 20,
+  marginRatio = 0.05,
+) {
+
+  var canvas = document.getElementById("canvas");
+  var context = canvas.getContext("2d");
+
+  // An object contains the needed info for the callback functions
+  var param = {
+    amplitude: amplitude,
+  	frequency: frequency,
+  	offset: offset,
+    // The size of canvas
+  	canvasWidth: context.canvas.width,
+  	canvasHeight: context.canvas.height,
+    // The vertical margin size on both side
+  	y_axis_Margin: context.canvas.height * marginRatio,
+    // The horizontal margin size on both side
+  	x_axis_Margin: context.canvas.width * marginRatio,
+    // The size of plots
+  	plotWidth: context.canvas.width * (1 - 2 * marginRatio),
+  	plotHeight: context.canvas.height * (1 - 2 * marginRatio),
+    // The numbers of X and Y axis
+  	numLinesX: numLinesX,
+  	numLinesY: numLinesY,
+    // The ratio of plot's margin to canvas size
+    marginRatio: marginRatio,
+  };
+
+  // Callback functions which draw on Canvas
+  plotGrid(context,param);
+  plotSine(context,param);
+}
+
+/**
+ * Painting Axis and grid on the canvas with Pure JavaScript and Canvas API
+ * Inputs:
+ * - context: The instance for the drawing surface of an <canvas> element
+ * - param: A object contains the Plot'paramete
+ */
+const plotAxis = function plotGridAndAxisOnCanvas(context, param) {
+  context.beginPath();
+  context.lineWidth = 0.1;
+  context.strokeStyle = "rgb(128,128,128)";
+
+  // Draw the vertical lines on the plot region
+  for (var i = 0; i <= param.numLinesY; i ++) {
+    context.moveTo (param.x_axis_Margin + i * param.plotWidth / param.numLinesY, param.y_axis_Margin);
+    context.lineTo (param.x_axis_Margin + i * param.plotWidth / param.numLinesY, param.canvasHeight - param.y_axis_Margin);
+    context.fillText(i * 50, param.x_axis_Margin + i * param.plotWidth / 20, param.canvasHeight - param.y_axis_Margin/2);
+  }
+
+  // Draw the horizontal lines on the plot region
+  for (var j = 0; j  <= param.numLinesX; j ++) {
+    context.moveTo (param.x_axis_Margin, param.y_axis_Margin + param.marginRatio * param.plotHeight + 0.9 * param.plotHeight / param.numLinesX * j);
+    context.lineTo (param.canvasWidth - param.x_axis_Margin, param.y_axis_Margin + param.marginRatio * param.plotHeight + 0.9 * param.plotHeight / param.numLinesX * j);
+    context.fillText((param.amplitude * (1 - j * 0.2)).toFixed(1), param.x_axis_Margin / 2 , param.y_axis_Margin + param.marginRatio * param.plotHeight + 0.9 * param.plotHeight / param.numLinesX * j);
+  }
+  context.closePath();
+  context.stroke();
+
+  // Draw a thicker line, which is the border of the Plots
+  context.lineWidth = 1;
+  context.beginPath();
+  context.closePath();
+  context.strokeRect(param.x_axis_Margin,param.y_axis_Margin,param.plotWidth,param.plotHeight);
+}
+
+/**
+ * Painting Sine Waves on the canvas with Pure JavaScript and Canvas API
+ * Inputs:
+ * - context: The instance for the drawing surface of an <canvas> element
+ * - param: A object contains the Plot'paramete
+ */
+const plotSine = function plotSineOnCanvas(context, param) {
+  // Change the lines color and width for plotting sine waves
+  context.beginPath();
+  context.lineWidth = 2;
+  context.strokeStyle = "rgb(64,224,208)";
+
+  // x representing the degree
+  // y representing the corresponding distance from the "resting" position
+  var x = param.x_axis_Margin, y;
+  while (x < param.canvasWidth - param.x_axis_Margin ) {
+    // y = A * sin(W*x + phase)
+  	y = param.canvasHeight/2 + (1 - 2 * param.marginRatio)/2 * param.plotHeight * Math.sin((x - param.x_axis_Margin)* 50/180 * Math.PI * param.frequency + param.offset);
+  	context.lineTo(x, y);
+  	x++;
+  }
+  context.stroke();
+}
+
+// Can manully change the Sines Wave's amplitude, Frequence, offset or the Grid's parameters.
+draw(plotAxis,plotSine);
+
+</script>
+
+</html>
